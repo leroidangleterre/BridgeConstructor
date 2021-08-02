@@ -1,5 +1,6 @@
 package bridgeconstructor;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
@@ -11,32 +12,76 @@ public class Bridge {
 
     private ArrayList<Plank> planks;
 
+    private Plank newPlank;
+    // The coordinates of the first end of the new plank
+    private double xPlankStart, yPlankStart;
+
+    private int gridSize; // The number of columns of dots displayed
+    private double gridStep; // The distance between two dots of the same line or column
+
     public Bridge() {
         planks = new ArrayList<>();
-        buildBasicBridge();
+        gridSize = 8;
+        gridStep = 5;
     }
 
     public void paint(Graphics g, double x0, double y0, double zoom) {
+
+        paintGrid(g, x0, y0, zoom);
+
         for (Plank p : planks) {
             p.paint(g, x0, y0, zoom);
         }
-    }
-
-    private void buildBasicBridge() {
-
-        int nbPlanks = 5;
-        double radius = 10;
-
-        double y0 = 100;
-
-        for (int i = 0; i <= nbPlanks; i++) {
-            double angle = Math.PI * (i + 1 / 2) / nbPlanks;
-            double x = radius * Math.cos(angle);
-            double y = y0 + radius * Math.sin(angle);
-            double length = radius * Math.PI / nbPlanks;
-            Plank p = new Plank(x, y, angle, length);
-            planks.add(p);
+        if (newPlank != null) {
+            newPlank.paint(g, x0, y0, zoom);
         }
     }
 
+    private void paintGrid(Graphics g, double x0, double y0, double zoom) {
+
+        g.setColor(Color.red);
+        int radius = 2;
+
+        int h = g.getClipBounds().height;
+
+        for (int i = -gridSize; i <= gridSize; i++) {
+            int yApp = (int) (h - (y0 + (gridStep * i) * zoom));
+            for (int j = -gridSize; j <= gridSize; j++) {
+                int xApp = (int) (x0 + (gridStep * j) * zoom);
+                g.fillOval(xApp - radius, yApp - radius, 2 * radius, 2 * radius);
+            }
+        }
+    }
+
+    void mouseDragged(double x, double y) {
+        if (newPlank != null) {
+            // The second end of the plank goes to (x, y)
+            newPlank.setEndCoords(xPlankStart, yPlankStart,
+                    snapToGrid(x), snapToGrid(y));
+        }
+    }
+
+    void createPlank(double x, double y) {
+
+        xPlankStart = snapToGrid(x);
+        yPlankStart = snapToGrid(y);
+
+        newPlank = new Plank(xPlankStart, yPlankStart, 0, 0);
+    }
+
+    /**
+     * Return the value of the grid that is closest to the given value.
+     */
+    private double snapToGrid(double x) {
+        return (Math.floor(x / gridStep + 0.5)) * gridStep;
+    }
+
+    /**
+     * The plank that is being built must now be added to the list
+     * and not modified anymore.
+     */
+    void finishNewPlank() {
+        planks.add(newPlank);
+        newPlank = null;
+    }
 }
