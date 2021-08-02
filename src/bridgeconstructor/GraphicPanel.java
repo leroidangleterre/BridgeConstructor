@@ -25,9 +25,9 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
     public GraphicPanel(World newWorld) {
         super();
         world = newWorld;
-        x0 = 567.1;
-        y0 = 396.6;
-        zoom = 54.76;
+        x0 = 550.5;
+        y0 = 363.7;
+        zoom = 9.85;
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.addMouseWheelListener(this);
@@ -57,6 +57,7 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
             // Mousewheel click, must pan the view
             isPanning = true;
         }
+        repaint();
     }
 
     @Override
@@ -121,7 +122,7 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
         x0 = zoomFact * (x0 - e.getX()) + e.getX();
         y0 = h - e.getY() - zoomFact * (h - y0 - e.getY());
         zoom = zoom * zoomFact;
-
+        System.out.println("x0: " + x0 + ", y0: " + y0 + ", zoom: " + zoom);
         repaint();
     }
 

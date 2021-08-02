@@ -54,6 +54,7 @@ public class BridgeMenu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Click delete");
+                panel.setMode(UIMode.DELETE);
             }
         });
         this.add(deleteButton);

@@ -84,4 +84,38 @@ public class Bridge {
         planks.add(newPlank);
         newPlank = null;
     }
+
+    /**
+     * Delete the object (plank, cable, ...) that is closest to the given
+     * coordinates.
+     *
+     * @param x
+     * @param y
+     */
+    void deleteClosest(double x, double y) {
+
+        Plank closestPlank = findClosest(x, y);
+        planks.remove(closestPlank);
+    }
+
+    /**
+     * Find the plank that is closest to the given coordinates.
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    private Plank findClosest(double x, double y) {
+        Plank closestYet = null;
+        double shortestDistanceYet = Double.MAX_VALUE;
+
+        for (Plank p : planks) {
+            double distance = p.getDistance(x, y);
+            if (distance < shortestDistanceYet) {
+                shortestDistanceYet = distance;
+                closestYet = p;
+            }
+        }
+        return closestYet;
+    }
 }

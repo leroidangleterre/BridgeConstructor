@@ -38,6 +38,7 @@ public class World {
     }
 
     protected void mousePressed(double xWorld, double yWorld) {
+
         switch (currentMode) {
         case PLANK_CREATION:
             bridge.createPlank(xWorld, yWorld);
@@ -45,9 +46,11 @@ public class World {
         case CABLE_CREATION:
 //            bridge.createCable(xWorld, yWorld);
             break;
+        case DELETE:
+            // Must delete the closest plank or cable
+            bridge.deleteClosest(xWorld, yWorld);
+            break;
         default:
-            throw new AssertionError(currentMode.name());
-
         }
     }
 
