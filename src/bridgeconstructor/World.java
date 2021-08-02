@@ -17,13 +17,15 @@ public class World {
     // Vehicles travelling somewhere on the ground or on the bridge (or falling from the bridge)
     private ArrayList<Vehicle> vehicles;
 
+    private UIMode currentMode;
+
     public World() {
         bridge = new Bridge();
 
+        currentMode = UIMode.PLANK_CREATION;
     }
 
     public void paint(Graphics g, double x0, double y0, double zoom) {
-        System.out.println("World.paint");
         bridge.paint(g, x0, y0, zoom);
         paintCenter(g, x0, y0, zoom);
     }
@@ -35,4 +37,35 @@ public class World {
         g.drawLine((int) x0, (int) (h - y0), (int) x0, (int) (h - (y0 + zoom)));
     }
 
+    protected void mousePressed(double xWorld, double yWorld) {
+
+        switch (currentMode) {
+        case PLANK_CREATION:
+            bridge.createPlank(xWorld, yWorld);
+            break;
+        case CABLE_CREATION:
+//            bridge.createCable(xWorld, yWorld);
+            break;
+        case DELETE:
+            // Must delete the closest plank or cable
+            bridge.deleteClosest(xWorld, yWorld);
+            break;
+        default:
+        }
+    }
+
+    protected void setMode(UIMode newMode) {
+        currentMode = newMode;
+    }
+
+    void mouseReleased() {
+        switch (currentMode) {
+        case PLANK_CREATION:
+            bridge.finishNewPlank();
+        }
+    }
+
+    void mouseDragged(double x, double y) {
+        bridge.mouseDragged(x, y);
+    }
 }

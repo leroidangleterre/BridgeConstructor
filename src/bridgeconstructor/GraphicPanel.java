@@ -15,27 +15,31 @@ import javax.swing.JPanel;
  */
 public class GraphicPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
-    private World w;
+    private World world;
 
     private double x0, y0, zoom;
     private int xMouse, yMouse;
 
-    public GraphicPanel(World world) {
+    private boolean isPanning;
+
+    public GraphicPanel(World newWorld) {
         super();
-        w = world;
-        x0 = 100;
-        y0 = 0;
-        zoom = 1;
+        world = newWorld;
+        x0 = 550.5;
+        y0 = 363.7;
+        zoom = 9.85;
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.addMouseWheelListener(this);
+
+        isPanning = false;
     }
 
     @Override
     public void paintComponent(Graphics g) {
         g.setColor(Color.white);
         g.fillRect(0, 0, g.getClipBounds().width, g.getClipBounds().height);
-        w.paint(g, x0, y0, zoom);
+        world.paint(g, x0, y0, zoom);
     }
 
     @Override
@@ -44,10 +48,23 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
 
     @Override
     public void mousePressed(MouseEvent e) {
+        if (e.getButton() == 1) {
+            isPanning = false;
+            double xWorld = (e.getX() - x0) / zoom;
+            double yWorld = (this.getHeight() - e.getY() - y0) / zoom;
+            world.mousePressed(xWorld, yWorld);
+        } else if (e.getButton() == 2) {
+            // Mousewheel click, must pan the view
+            isPanning = true;
+        }
+        repaint();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        if (e.getButton() == 1) {
+            world.mouseReleased();
+        }
     }
 
     @Override
@@ -65,8 +82,14 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
         xMouse = e.getX();
         yMouse = e.getY();
 
-        x0 += dx;
-        y0 -= dy;
+        if (isPanning) {
+            x0 += dx;
+            y0 -= dy;
+        } else {
+            double xWorld = (e.getX() - x0) / zoom;
+            double yWorld = (this.getHeight() - e.getY() - y0) / zoom;
+            world.mouseDragged(xWorld, yWorld);
+        }
         repaint();
     }
 
@@ -90,9 +113,6 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
             // Zoom out
             zoomFact = 1 / 1.1;
             break;
-        case 0:
-            // touchpad
-            break;
         default:
             break;
         }
@@ -102,7 +122,11 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
         x0 = zoomFact * (x0 - e.getX()) + e.getX();
         y0 = h - e.getY() - zoomFact * (h - y0 - e.getY());
         zoom = zoom * zoomFact;
-
+        System.out.println("x0: " + x0 + ", y0: " + y0 + ", zoom: " + zoom);
         repaint();
+    }
+
+    public void setMode(UIMode uiMode) {
+        world.setMode(uiMode);
     }
 }
