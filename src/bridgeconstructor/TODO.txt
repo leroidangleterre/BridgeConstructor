@@ -1,0 +1,6 @@
+TODO:
+
+1 Add some damping to the springs
+2 Create a "restart" button
+3 Remove the appropriate springs when a bridge element is removed
+
