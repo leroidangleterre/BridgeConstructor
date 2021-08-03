@@ -65,6 +65,7 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
         if (e.getButton() == 1) {
             world.mouseReleased();
         }
+        repaint();
     }
 
     @Override
@@ -122,11 +123,15 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
         x0 = zoomFact * (x0 - e.getX()) + e.getX();
         y0 = h - e.getY() - zoomFact * (h - y0 - e.getY());
         zoom = zoom * zoomFact;
-        System.out.println("x0: " + x0 + ", y0: " + y0 + ", zoom: " + zoom);
         repaint();
     }
 
     public void setMode(UIMode uiMode) {
         world.setMode(uiMode);
+    }
+
+    void step() {
+        world.step();
+        repaint();
     }
 }

@@ -14,6 +14,8 @@ public class BridgeMenu extends JPanel {
 
     private final JButton plankButton;
     private final JButton cableButton;
+    private final JButton concreteButton;
+    private final JButton stepButton;
     private final JButton playPauseButton;
     private final JButton deleteButton;
 
@@ -36,9 +38,20 @@ public class BridgeMenu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Click new cable");
+                panel.setMode(UIMode.CABLE_CREATION);
             }
         });
         this.add(cableButton);
+
+        concreteButton = new JButton("Concrete");
+        concreteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Click new concrete");
+                panel.setMode(UIMode.CONCRETE_CREATION);
+            }
+        });
+        this.add(concreteButton);
 
         playPauseButton = new JButton("Play");
         playPauseButton.addActionListener(new ActionListener() {
@@ -48,6 +61,18 @@ public class BridgeMenu extends JPanel {
             }
         });
         this.add(playPauseButton);
+
+        stepButton = new JButton("Step");
+        stepButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("");
+                System.out.println("------------------------------------");
+                System.out.println("Click step");
+                panel.step();
+            }
+        });
+        this.add(stepButton);
 
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(new ActionListener() {
