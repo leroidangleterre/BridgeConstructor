@@ -14,6 +14,8 @@ public class World {
     // Bridge
     private Bridge bridge;
 
+    public static double gravity = -1;
+
     // Vehicles travelling somewhere on the ground or on the bridge (or falling from the bridge)
     private ArrayList<Vehicle> vehicles;
 
@@ -44,7 +46,10 @@ public class World {
             bridge.createPlank(xWorld, yWorld);
             break;
         case CABLE_CREATION:
-//            bridge.createCable(xWorld, yWorld);
+            bridge.createCable(xWorld, yWorld);
+            break;
+        case CONCRETE_CREATION:
+            bridge.createConcrete(xWorld, yWorld);
             break;
         case DELETE:
             // Must delete the closest plank or cable
@@ -61,11 +66,35 @@ public class World {
     void mouseReleased() {
         switch (currentMode) {
         case PLANK_CREATION:
-            bridge.finishNewPlank();
+        case CABLE_CREATION:
+        case CONCRETE_CREATION:
+            bridge.finishNewElement();
         }
     }
 
     void mouseDragged(double x, double y) {
         bridge.mouseDragged(x, y);
     }
+
+    /**
+     * Compute one step of evolution
+     */
+    public void step() {
+        this.step(0.1);
+    }
+
+    public void step(double dt) {
+        bridge.step(dt);
+        applyGravity(this.gravity, dt);
+    }
+
+    /**
+     * Apply gravity to the bridge, the vehicles, and any other object.
+     *
+     * @param dt
+     */
+    private void applyGravity(double g, double dt) {
+        bridge.applyGravity(g, dt);
+    }
+
 }

@@ -7,5 +7,6 @@ package bridgeconstructor;
 public enum UIMode {
     PLANK_CREATION,
     CABLE_CREATION,
+    CONCRETE_CREATION,
     DELETE
 }

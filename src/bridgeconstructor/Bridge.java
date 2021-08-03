@@ -10,17 +10,17 @@ import java.util.ArrayList;
  */
 public class Bridge {
 
-    private ArrayList<Plank> planks;
+    private ArrayList<BridgeElement> bridgeElements;
 
-    private Plank newPlank;
+    private BridgeElement newElement;
     // The coordinates of the first end of the new plank
-    private double xPlankStart, yPlankStart;
+    private double xStart, yStart;
 
     private int gridSize; // The number of columns of dots displayed
     private double gridStep; // The distance between two dots of the same line or column
 
     public Bridge() {
-        planks = new ArrayList<>();
+        bridgeElements = new ArrayList<>();
         gridSize = 8;
         gridStep = 5;
     }
@@ -29,11 +29,11 @@ public class Bridge {
 
         paintGrid(g, x0, y0, zoom);
 
-        for (Plank p : planks) {
+        for (BridgeElement p : bridgeElements) {
             p.paint(g, x0, y0, zoom);
         }
-        if (newPlank != null) {
-            newPlank.paint(g, x0, y0, zoom);
+        if (newElement != null) {
+            newElement.paint(g, x0, y0, zoom);
         }
     }
 
@@ -54,19 +54,36 @@ public class Bridge {
     }
 
     void mouseDragged(double x, double y) {
-        if (newPlank != null) {
-            // The second end of the plank goes to (x, y)
-            newPlank.setEndCoords(xPlankStart, yPlankStart,
+        if (newElement != null) {
+            // The first end of the plank or cable already is at (xStart, yStart);
+            // the second end goes to (x, y)
+            newElement.setEndCoords(xStart, yStart,
                     snapToGrid(x), snapToGrid(y));
         }
     }
 
     void createPlank(double x, double y) {
 
-        xPlankStart = snapToGrid(x);
-        yPlankStart = snapToGrid(y);
+        xStart = snapToGrid(x);
+        yStart = snapToGrid(y);
 
-        newPlank = new Plank(xPlankStart, yPlankStart, 0, 0);
+        newElement = new Plank(xStart, yStart, 0, 0);
+    }
+
+    void createCable(double x, double y) {
+
+        xStart = snapToGrid(x);
+        yStart = snapToGrid(y);
+
+        newElement = new Cable(xStart, yStart, 0, 0);
+    }
+
+    void createConcrete(double x, double y) {
+
+        xStart = snapToGrid(x);
+        yStart = snapToGrid(y);
+
+        newElement = new Concrete(xStart, yStart, 0, 0);
     }
 
     /**
@@ -80,9 +97,11 @@ public class Bridge {
      * The plank that is being built must now be added to the list
      * and not modified anymore.
      */
-    void finishNewPlank() {
-        planks.add(newPlank);
-        newPlank = null;
+    void finishNewElement() {
+        bridgeElements.add(newElement);
+        newElement.computeMassAndInertiaMoment();
+        newElement = null;
+        rebuildSprings();
     }
 
     /**
@@ -94,8 +113,8 @@ public class Bridge {
      */
     void deleteClosest(double x, double y) {
 
-        Plank closestPlank = findClosest(x, y);
-        planks.remove(closestPlank);
+        BridgeElement closestElement = findClosest(x, y);
+        bridgeElements.remove(closestElement);
     }
 
     /**
@@ -105,11 +124,11 @@ public class Bridge {
      * @param y
      * @return
      */
-    private Plank findClosest(double x, double y) {
-        Plank closestYet = null;
+    private BridgeElement findClosest(double x, double y) {
+        BridgeElement closestYet = null;
         double shortestDistanceYet = Double.MAX_VALUE;
 
-        for (Plank p : planks) {
+        for (BridgeElement p : bridgeElements) {
             double distance = p.getDistance(x, y);
             if (distance < shortestDistanceYet) {
                 shortestDistanceYet = distance;
@@ -117,5 +136,107 @@ public class Bridge {
             }
         }
         return closestYet;
+    }
+
+    void step(double dt) {
+
+        // Part one: compute the force and momentum applied on each element;
+        // Change the velocity and rotation rate
+        computeAllForcesAndMomentums(dt);
+        // Part three: update the position and rotation
+        updatePositionsAndRotations(dt);
+    }
+
+    private void computeAllForcesAndMomentums(double dt) {
+        for (BridgeElement be : bridgeElements) {
+            if (be instanceof Spring) {
+                ((Spring) be).applyForce(dt);
+            }
+        }
+    }
+
+    /**
+     * When all planks, cables, and other elements are set, and before the
+     * simulation starts,
+     * we must create the springs that unite them.
+     */
+    private void rebuildSprings() {
+
+        deleteAllSprings();
+        buildSprings();
+    }
+
+    private void deleteAllSprings() {
+
+        for (int rank = bridgeElements.size() - 1; rank >= 0; rank--) {
+            if (bridgeElements.get(rank) instanceof Spring) {
+                bridgeElements.remove(rank);
+            }
+        }
+    }
+
+    private void buildSprings() {
+
+        int rank0 = 0;
+        while (rank0 < bridgeElements.size() && !(bridgeElements.get(rank0) instanceof Spring)) {
+            BridgeElement be0 = bridgeElements.get(rank0);
+            int rank1 = rank0 + 1;
+            while (rank1 < bridgeElements.size() && !(bridgeElements.get(rank1) instanceof Spring)) {
+                BridgeElement be1 = bridgeElements.get(rank1);
+                tryBuildSpring(be0, be1);
+                rank1++;
+            }
+            rank0++;
+        }
+    }
+
+    private void tryBuildSpring(BridgeElement be0, BridgeElement be1) {
+
+        Spring newSpring = null;
+
+        // See if the pair (be0, be1) has a point in common.
+        // First possibility: it is the first point for both objects
+        if (be0.sharePoint(be1, true, true)) {
+            newSpring = new Spring();
+            newSpring.setTargets(be0, true, be1, true);
+        }
+        // Second possibility: first point for be0, second for be1
+        if (be0.sharePoint(be1, true, false)) {
+            newSpring = new Spring();
+            newSpring.setTargets(be0, true, be1, false);
+        }
+        // Third possibility: second point for be0, first for be1
+        if (be0.sharePoint(be1, false, true)) {
+            newSpring = new Spring();
+            newSpring.setTargets(be0, false, be1, true);
+        }
+        // Fourth possibility: second point for both
+        if (be0.sharePoint(be1, false, false)) {
+            newSpring = new Spring();
+            newSpring.setTargets(be0, false, be1, false);
+        }
+
+        if (newSpring != null) {
+            // We found a point in common, and created a spring.
+            bridgeElements.add(newSpring);
+        }
+    }
+
+    private void updatePositionsAndRotations(double dt) {
+        for (BridgeElement be : bridgeElements) {
+            be.moveAndRotateAtCurrentSpeed(dt);
+        }
+    }
+
+    /**
+     * Apply gravity to the elements of the bridge
+     *
+     * @param gy
+     * @param dt
+     */
+    void applyGravity(double gy, double dt) {
+        for (BridgeElement be : bridgeElements) {
+            be.changeVelocity(0, gy, dt);
+        }
     }
 }
