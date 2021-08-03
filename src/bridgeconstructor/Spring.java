@@ -22,7 +22,7 @@ public class Spring extends BridgeElement {
 
     public Spring(double newX, double newY, double newAngle, double newLength) {
         super(newX, newY, newAngle, newLength);
-        stiffness = 1;
+        stiffness = 30;
     }
 
     public Spring() {

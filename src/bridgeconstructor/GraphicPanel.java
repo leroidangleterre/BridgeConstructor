@@ -7,6 +7,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.JPanel;
 
 /**
@@ -22,6 +24,9 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
 
     private boolean isPanning;
 
+    private Timer timer;
+    private int delay, period; // milliseconds
+
     public GraphicPanel(World newWorld) {
         super();
         world = newWorld;
@@ -33,6 +38,10 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
         this.addMouseWheelListener(this);
 
         isPanning = false;
+
+        timer = null;
+        delay = 0;
+        period = 50;
     }
 
     @Override
@@ -133,5 +142,32 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
     void step() {
         world.step();
         repaint();
+    }
+
+    /**
+     * Toggle between play and pause
+     *
+     * @return true if the sim is now playing (i.e. it was started), false
+     * otherwise
+     */
+    boolean playPause() {
+        if (timer == null) {
+            // Start the simulation
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    world.step();
+                    repaint();
+                }
+            }, delay, period);
+            System.out.println("Timer started");
+            return true;
+        } else {
+            timer.cancel();
+            timer = null;
+            System.out.println("Timer stopped");
+            return false;
+        }
     }
 }

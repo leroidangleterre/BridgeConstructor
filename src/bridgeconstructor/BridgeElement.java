@@ -78,9 +78,6 @@ public abstract class BridgeElement {
 
         int xApp = (int) ((xAppTab[2] + xAppTab[0]) / 2);
         int yApp = (int) ((yAppTab[2] + yAppTab[0]) / 2);
-
-        g.setColor(Color.black);
-        g.drawString(this.mass + "", xApp, yApp);
     }
 
     public abstract Color getColor();

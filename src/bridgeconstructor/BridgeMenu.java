@@ -58,6 +58,12 @@ public class BridgeMenu extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Click play");
+                boolean isPlaying = panel.playPause();
+                if (isPlaying) {
+                    playPauseButton.setText("Pause");
+                } else {
+                    playPauseButton.setText("Play");
+                }
             }
         });
         this.add(playPauseButton);
