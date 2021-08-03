@@ -98,8 +98,10 @@ public class Bridge {
      * and not modified anymore.
      */
     void finishNewElement() {
-        bridgeElements.add(newElement);
         newElement.computeMassAndInertiaMoment();
+        if (newElement.length != 0) {
+            bridgeElements.add(newElement);
+        }
         newElement = null;
         rebuildSprings();
     }
