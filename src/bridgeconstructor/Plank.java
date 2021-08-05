@@ -11,6 +11,8 @@ public class Plank extends BridgeElement {
 
     private colorramp.ColorRamp ramp;
 
+    private double frictionCoef;
+
     public Plank(double newX, double newY, double newAngle, double newLength) {
         super(newX, newY, newAngle, newLength);
         ramp = new ColorRamp();
@@ -18,14 +20,14 @@ public class Plank extends BridgeElement {
         ramp.addValue(1, new Color(185, 71, 0)); // Rust
 
         lineicMass = 10;
+
+        frictionCoef = 0.0;
     }
 
     @Override
     void computeMassAndInertiaMoment() {
         this.mass = lineicMass * length;
         this.inertiaMoment = mass * length * length / 12;
-//        System.out.println("Plank computed mass: " + mass
-//                + " and moment: " + inertiaMoment);
     }
 
     @Override
@@ -36,6 +38,12 @@ public class Plank extends BridgeElement {
     @Override
     public double getTension() {
         return 0;
+    }
+
+    @Override
+    void dampenSpeed(double dt) {
+        this.vx -= vx * frictionCoef / this.mass;
+        this.vy -= vy * frictionCoef / this.mass;
     }
 
 }

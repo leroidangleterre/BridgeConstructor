@@ -145,8 +145,14 @@ public class Bridge {
         // Part one: compute the force and momentum applied on each element;
         // Change the velocity and rotation rate
         computeAllForcesAndMomentums(dt);
+
+        // Part two: dampen the speeds
+        dampenSpeeds(dt);
+
         // Part three: update the position and rotation
         updatePositionsAndRotations(dt);
+
+        updateStringLengths();
     }
 
     private void computeAllForcesAndMomentums(double dt) {
@@ -240,5 +246,32 @@ public class Bridge {
         for (BridgeElement be : bridgeElements) {
             be.changeVelocity(0, gy, dt);
         }
+    }
+
+    private void updateStringLengths() {
+        for (BridgeElement be : bridgeElements) {
+            if (be instanceof Spring) {
+                ((Spring) be).updateLength();
+            }
+        }
+    }
+
+    private void dampenSpeeds(double dt) {
+        for (BridgeElement be : bridgeElements) {
+            be.dampenSpeed(dt);
+        }
+    }
+
+    void stopMovement() {
+        for (BridgeElement be : bridgeElements) {
+            be.stopMovement();
+        }
+    }
+
+    void restart() {
+        for (BridgeElement be : bridgeElements) {
+            be.restart();
+        }
+        rebuildSprings();
     }
 }

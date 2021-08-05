@@ -18,11 +18,18 @@ public class Spring extends BridgeElement {
     // Coordinates of the points where the spring is attached:
     double x0, y0, x1, y1;
 
-    private double stiffness;
+    private double stiffness, frictionCoef;
+    private double maxForce;
+
+    private double previousLength, currentLength;
 
     public Spring(double newX, double newY, double newAngle, double newLength) {
         super(newX, newY, newAngle, newLength);
         stiffness = 30;
+        frictionCoef = 0;
+        maxForce = 100;
+        previousLength = 0;
+        currentLength = 0;
     }
 
     public Spring() {
@@ -81,6 +88,10 @@ public class Spring extends BridgeElement {
         return tension;
     }
 
+    private double getFriction() {
+        return frictionCoef * (getLength() - previousLength);
+    }
+
     private double getLength() {
         computeTargetCoordinates();
         double dx = x1 - x0;
@@ -95,16 +106,18 @@ public class Spring extends BridgeElement {
     void applyForce(double dt) {
 
         // Unit vector ux goes from (x0,y0) to (x1,y1) and has norm one.
-        double currentLength = getLength();
+        currentLength = getLength();
         if (currentLength != 0) {
             double utx = (x1 - x0) / currentLength;
             double uty = (y1 - y0) / currentLength;
 
             double tension = getTension();
-            target0.receiveForce(tension * utx, tension * uty,
+            double force = tension;
+
+            target0.receiveForce(force * utx, force * uty,
                     x0, y0,
                     dt);
-            target1.receiveForce(-tension * utx, -tension * uty,
+            target1.receiveForce(-force * utx, -force * uty,
                     x1, y1,
                     dt);
         }
@@ -113,6 +126,20 @@ public class Spring extends BridgeElement {
 
     @Override
     void computeMassAndInertiaMoment() {
-        System.out.println("Spring mass and inertia moment unused.");
+        // Spring mass and inertia moment unused.
+    }
+
+    /**
+     * Memorize the current length so that it can be used later to compute the
+     * damping.
+     *
+     */
+    void updateLength() {
+        previousLength = currentLength;
+    }
+
+    @Override
+    void dampenSpeed(double dt) {
+        // Springs do not dampen their speed.
     }
 }

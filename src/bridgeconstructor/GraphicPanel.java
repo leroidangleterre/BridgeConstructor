@@ -32,16 +32,17 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
         world = newWorld;
         x0 = 550.5;
         y0 = 363.7;
-        zoom = 9.85;
+        zoom = 27.00;
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.addMouseWheelListener(this);
+        this.addKeyListener(new BridgeKeyListener(this));
 
         isPanning = false;
 
         timer = null;
         delay = 0;
-        period = 50;
+        period = 10;
     }
 
     @Override
@@ -152,22 +153,44 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
      */
     boolean playPause() {
         if (timer == null) {
-            // Start the simulation
-            timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    world.step();
-                    repaint();
-                }
-            }, delay, period);
-            System.out.println("Timer started");
+            play();
             return true;
         } else {
-            timer.cancel();
-            timer = null;
-            System.out.println("Timer stopped");
+            pause();
             return false;
         }
     }
+
+    private void play() {
+        // Start the simulation
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                world.step();
+                repaint();
+            }
+        }, delay, period);
+        System.out.println("Timer started");
+    }
+
+    private void pause() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        System.out.println("Timer stopped");
+    }
+
+    void stopMovement() {
+        world.setAllSpeedsToZero();
+    }
+
+    void restart() {
+
+        pause();
+        world.restart();
+        repaint();
+    }
+
 }

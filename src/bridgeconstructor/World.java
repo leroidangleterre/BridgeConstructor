@@ -20,6 +20,7 @@ public class World {
     private ArrayList<Vehicle> vehicles;
 
     private UIMode currentMode;
+    private double timestep = 0.01;
 
     public World() {
         bridge = new Bridge();
@@ -80,7 +81,7 @@ public class World {
      * Compute one step of evolution
      */
     public void step() {
-        this.step(0.1);
+        this.step(timestep);
     }
 
     public void step(double dt) {
@@ -95,6 +96,18 @@ public class World {
      */
     private void applyGravity(double g, double dt) {
         bridge.applyGravity(g, dt);
+    }
+
+    /**
+     * Set to zero the speed of all elements.
+     *
+     */
+    void setAllSpeedsToZero() {
+        bridge.stopMovement();
+    }
+
+    void restart() {
+        bridge.restart();
     }
 
 }

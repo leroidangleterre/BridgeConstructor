@@ -1,6 +1,5 @@
 package bridgeconstructor;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
@@ -17,11 +16,14 @@ public class BridgeMenu extends JPanel {
     private final JButton concreteButton;
     private final JButton stepButton;
     private final JButton playPauseButton;
+    private final JButton restartButton;
     private final JButton deleteButton;
 
     public BridgeMenu(GraphicPanel panel) {
 
         super();
+
+        BridgeKeyListener keyListener = new BridgeKeyListener(panel);
 
         plankButton = new JButton("Plank");
         plankButton.addActionListener(new ActionListener() {
@@ -31,6 +33,7 @@ public class BridgeMenu extends JPanel {
                 panel.setMode(UIMode.PLANK_CREATION);
             }
         });
+        plankButton.addKeyListener(keyListener);
         this.add(plankButton);
 
         cableButton = new JButton("Cable");
@@ -41,6 +44,7 @@ public class BridgeMenu extends JPanel {
                 panel.setMode(UIMode.CABLE_CREATION);
             }
         });
+        cableButton.addKeyListener(keyListener);
         this.add(cableButton);
 
         concreteButton = new JButton("Concrete");
@@ -51,6 +55,7 @@ public class BridgeMenu extends JPanel {
                 panel.setMode(UIMode.CONCRETE_CREATION);
             }
         });
+        concreteButton.addKeyListener(keyListener);
         this.add(concreteButton);
 
         playPauseButton = new JButton("Play");
@@ -66,7 +71,19 @@ public class BridgeMenu extends JPanel {
                 }
             }
         });
+        playPauseButton.addKeyListener(keyListener);
         this.add(playPauseButton);
+
+        restartButton = new JButton("Restart");
+        restartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Click restart");
+                panel.restart();
+            }
+        });
+        restartButton.addKeyListener(keyListener);
+        this.add(restartButton);
 
         stepButton = new JButton("Step");
         stepButton.addActionListener(new ActionListener() {
@@ -78,6 +95,7 @@ public class BridgeMenu extends JPanel {
                 panel.step();
             }
         });
+        stepButton.addKeyListener(keyListener);
         this.add(stepButton);
 
         deleteButton = new JButton("Delete");
@@ -88,6 +106,7 @@ public class BridgeMenu extends JPanel {
                 panel.setMode(UIMode.DELETE);
             }
         });
+        deleteButton.addKeyListener(keyListener);
         this.add(deleteButton);
     }
 

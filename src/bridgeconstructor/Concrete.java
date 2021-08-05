@@ -42,4 +42,9 @@ public class Concrete extends BridgeElement {
         // Unused
     }
 
+    @Override
+    void dampenSpeed(double dt) {
+        // Unused
+    }
+
 }

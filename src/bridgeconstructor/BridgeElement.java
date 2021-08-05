@@ -19,6 +19,9 @@ public abstract class BridgeElement {
     protected double length; // The default length, without any constraints.
     private double width;
 
+    // Position of the element at its creation
+    private double startX, startY, startVx, startVy, startAngle, startLength, startRotationRate;
+
     protected double mass;
     protected double inertiaMoment;
 
@@ -100,6 +103,14 @@ public abstract class BridgeElement {
         this.length = Math.sqrt(dx * dx + dy * dy);
 
         this.angle = Math.atan2(dy, dx);
+
+        startX = x;
+        startY = y;
+        startVx = vx;
+        startVy = vy;
+        startLength = length;
+        startAngle = angle;
+        startRotationRate = rotationRate;
     }
 
     protected void setCenter(double newX, double newY) {
@@ -291,6 +302,28 @@ public abstract class BridgeElement {
         this.y += this.vy * dt;
 
         this.angle += this.rotationRate * dt;
+    }
+
+    abstract void dampenSpeed(double dt);
+
+    void stopMovement() {
+        this.vx = 0;
+        this.vy = 0;
+        this.rotationRate = 0;
+    }
+
+    /**
+     * Go back to the original location and orientation
+     *
+     */
+    void restart() {
+        x = startX;
+        y = startY;
+        vx = startVx;
+        vy = startVy;
+        angle = startAngle;
+        length = startLength;
+        rotationRate = startRotationRate;
     }
 
 }

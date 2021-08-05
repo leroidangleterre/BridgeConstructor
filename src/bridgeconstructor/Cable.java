@@ -25,4 +25,9 @@ public class Cable extends BridgeElement {
         return Color.gray; // Must be replaced by a color ramp based on tension.
     }
 
+    @Override
+    void dampenSpeed(double dt) {
+        System.out.println("TODO cable dampenSpeed");
+    }
+
 }
