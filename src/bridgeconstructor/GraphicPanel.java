@@ -42,7 +42,7 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
 
         timer = null;
         delay = 0;
-        period = 10;
+        period = 5;
     }
 
     @Override
@@ -190,6 +190,15 @@ public class GraphicPanel extends JPanel implements MouseListener, MouseMotionLi
 
         pause();
         world.restart();
+        repaint();
+    }
+
+    void save() {
+        world.saveBridge();
+    }
+
+    void load() {
+        world.loadBridge();
         repaint();
     }
 

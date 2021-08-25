@@ -18,6 +18,8 @@ public class BridgeMenu extends JPanel {
     private final JButton playPauseButton;
     private final JButton restartButton;
     private final JButton deleteButton;
+    private final JButton saveButton;
+    private final JButton loadButton;
 
     public BridgeMenu(GraphicPanel panel) {
 
@@ -108,6 +110,26 @@ public class BridgeMenu extends JPanel {
         });
         deleteButton.addKeyListener(keyListener);
         this.add(deleteButton);
+
+        saveButton = new JButton("Save");
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.save();
+            }
+        });
+        saveButton.addKeyListener(keyListener);
+        this.add(saveButton);
+
+        loadButton = new JButton("Load");
+        loadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.load();
+            }
+        });
+        loadButton.addKeyListener(keyListener);
+        this.add(loadButton);
     }
 
 }

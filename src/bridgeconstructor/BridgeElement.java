@@ -1,9 +1,11 @@
 package bridgeconstructor;
 
-import colorramp.ColorRamp;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Random;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -170,36 +172,17 @@ public abstract class BridgeElement {
         return "Plank centered at " + this.x + ", " + this.y;
     }
 
-    private void paintColoredNeighbors(Graphics g, double x0, double y0, double zoom) {
-        ColorRamp ramp = new ColorRamp();
-
-        ramp.addValue(-this.length, Color.red);
-        ramp.addValue(0, Color.blue);
-        ramp.addValue(this.length, Color.yellow);
-        ramp.addValue(1.5 * this.length, Color.green);
-
-        for (int i = 0; i < 10000; i++) {
-            double maxDistance = 100;
-            double x = this.x + 2 * maxDistance * (new Random().nextDouble() - 0.5);
-            double y = this.y + 2 * maxDistance * (new Random().nextDouble() - 0.5);
-
-            double distance = this.getDistance(x, y);
-
-            int radius = 3;
-            g.setColor(ramp.getValue(distance));
-            int xApp = (int) (x0 + x * zoom);
-            int yApp = (int) (g.getClipBounds().height - (y0 + y * zoom));
-            g.fillOval(xApp - radius, yApp - radius, 2 * radius, 2 * radius);
-        }
-    }
-
     /**
      * Get how much stress the element is under.
      *
      * @return the amount of tension received by the mechanical element.
      */
     public double getTension() {
-        return 0;
+        return tension;
+    }
+
+    public void resetTension() {
+        tension = 0;
     }
 
     public double getXA() {
@@ -235,6 +218,9 @@ public abstract class BridgeElement {
 
         // Change in rotation rate:
         changeRotationRate(fx, fy, xApplication, yApplication, dt);
+
+        // Change in tension
+        changeInnerTension(fx, fy, xApplication, yApplication, dt);
     }
 
     void changeVelocity(double fx, double fy, double dt) {
@@ -249,10 +235,31 @@ public abstract class BridgeElement {
             double dt) {
 
         double forceMoment = (xApp - x) * fy - (yApp - y) * fx;
-//        System.out.println("forceMoment: " + forceMoment);
-
-//        System.out.println("inertiaMoment: " + inertiaMoment);
         rotationRate += forceMoment / inertiaMoment;
+    }
+
+    private void changeInnerTension(double fx, double fy,
+            double xApplication, double yApplication,
+            double dt) {
+
+        double xA = getXA();
+        double xB = getXB();
+        double yA = getYA();
+        double yB = getYB();
+
+        // Unit vector from A to B
+        double uX = (xB - xA) / length;
+        double uY = (yB - yA) / length;
+
+        double dFElongation = 0;
+
+        if (isCloseToA(xApplication, yApplication)) {
+            dFElongation = -(fx * uX + fy * uY);
+        } else {
+            dFElongation = fx * uX + fy * uY;
+        }
+
+        tension += dFElongation;
     }
 
     /**
@@ -326,4 +333,32 @@ public abstract class BridgeElement {
         rotationRate = startRotationRate;
     }
 
+    /**
+     * Tell whether a given point is closer to A or to B.
+     *
+     * @param xC
+     * @param yC
+     * @return true when C is closer to A than to B, false otherwise.
+     */
+    private boolean isCloseToA(double xC, double yC) {
+
+        double xA = getXA();
+        double xB = getXB();
+        double yA = getYA();
+        double yB = getYB();
+
+        // Compare the squares of the distances
+        double dAsquared = (xA - xC) * (xA - xC) + (yA - yC) * (yA * yC);
+        double dBsquared = (xB - xC) * (xB - xC) + (yB - yC) * (yB * yC);
+
+        return (dAsquared < dBsquared);
+    }
+
+    void save(BufferedWriter writer) {
+        try {
+            writer.write(this.getClass() + " " + x + " " + y + " " + angle + " " + length + "\n");
+        } catch (IOException ex) {
+            Logger.getLogger(Plank.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

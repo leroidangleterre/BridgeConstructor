@@ -2,7 +2,12 @@ package bridgeconstructor;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -157,6 +162,9 @@ public class Bridge {
 
     private void computeAllForcesAndMomentums(double dt) {
         for (BridgeElement be : bridgeElements) {
+            be.resetTension();
+        }
+        for (BridgeElement be : bridgeElements) {
             if (be instanceof Spring) {
                 ((Spring) be).applyForce(dt);
             }
@@ -273,5 +281,88 @@ public class Bridge {
             be.restart();
         }
         rebuildSprings();
+    }
+
+    private double getMinTension() {
+        double minTension = Double.MAX_VALUE;
+        for (BridgeElement be : bridgeElements) {
+            if (be.getTension() < minTension) {
+                minTension = be.getTension();
+            }
+        }
+        return minTension;
+    }
+
+    private double getMaxTension() {
+        double maxTension = Double.MIN_VALUE;
+        for (BridgeElement be : bridgeElements) {
+            if (be.getTension() > maxTension) {
+                maxTension = be.getTension();
+            }
+        }
+        return maxTension;
+    }
+
+    /**
+     * Save the bridge to a file.
+     *
+     * @param writer the BufferedWriter used to open the file.
+     */
+    void save(BufferedWriter writer) {
+
+        for (BridgeElement be : bridgeElements) {
+            be.save(writer);
+        }
+    }
+
+    /**
+     * Load a bridge from a file.
+     *
+     * @param reader the BufferedReader used to open the file.
+     */
+    void load(BufferedReader reader) {
+        bridgeElements.clear();
+
+        String line;
+        try {
+            while ((line = reader.readLine()) != null) {
+                String tab[] = line.split(" ");
+                String type = tab[1].split("\\.")[1];
+                double x = Double.valueOf(tab[2]);
+                double y = Double.valueOf(tab[3]);
+                double angle = Double.valueOf(tab[4]);
+                double length = Double.valueOf(tab[5]);
+
+                // Create a new BridgeElement
+                newElement = null;
+                switch (type) {
+                case "Plank":
+                    newElement = new Plank(x, y, angle, length);
+                    break;
+                case "Concrete":
+                    newElement = new Concrete(x, y, angle, length);
+                    break;
+                case "Cable":
+                    newElement = new Cable(x, y, angle, length);
+                    break;
+                default:
+                    break;
+                }
+                if (newElement != null) {
+
+                    newElement.setEndCoords(
+                            newElement.getXA(),
+                            newElement.getYA(),
+                            newElement.getXB(),
+                            newElement.getYB());
+                    newElement.computeMassAndInertiaMoment();
+
+                    bridgeElements.add(newElement);
+                }
+            }
+            buildSprings();
+        } catch (IOException ex) {
+            Logger.getLogger(Bridge.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

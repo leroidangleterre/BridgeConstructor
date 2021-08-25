@@ -1,5 +1,6 @@
 package bridgeconstructor;
 
+import colorramp.ColorRamp;
 import java.awt.Color;
 import java.awt.Graphics;
 
@@ -23,13 +24,21 @@ public class Spring extends BridgeElement {
 
     private double previousLength, currentLength;
 
+    private static ColorRamp ramp;
+
     public Spring(double newX, double newY, double newAngle, double newLength) {
         super(newX, newY, newAngle, newLength);
-        stiffness = 30;
+        stiffness = 500;
         frictionCoef = 0;
         maxForce = 100;
         previousLength = 0;
         currentLength = 0;
+        ramp = new ColorRamp();
+        ramp.addValue(0, Color.gray);
+        ramp.addValue(1, Color.blue);
+        ramp.addValue(10, Color.green);
+        ramp.addValue(100, Color.red);
+        ramp.addValue(200, Color.black);
     }
 
     public Spring() {
@@ -38,7 +47,7 @@ public class Spring extends BridgeElement {
 
     @Override
     public Color getColor() {
-        return Color.orange;
+        return ramp.getValue(getTension());
     }
 
     @Override

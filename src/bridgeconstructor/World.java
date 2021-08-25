@@ -2,7 +2,16 @@ package bridgeconstructor;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -86,7 +95,7 @@ public class World {
 
     public void step(double dt) {
         bridge.step(dt);
-        applyGravity(this.gravity, dt);
+        applyGravity(gravity, dt);
     }
 
     /**
@@ -108,6 +117,29 @@ public class World {
 
     void restart() {
         bridge.restart();
+    }
+
+    void saveBridge() {
+        System.out.println("Saving to file.");
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(new File("./bridge.save")));
+            bridge.save(writer);
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    void loadBridge() {
+        System.out.println("Loading bridge from file.");
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(new File("./bridge.save")));
+            bridge.load(reader);
+            System.out.println("    Loading done.");
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }
